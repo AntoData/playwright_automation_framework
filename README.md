@@ -17,6 +17,8 @@ The framework demonstrates:
 
 ## Setup
 
+### Developed using Python 3.14
+
 ### 1. Install Python dependencies
 
 ```bash

@@ -1,8 +1,7 @@
 import time
-
-import playwright.sync_api
 import pytest
 from datetime import datetime, timedelta
+import playwright.sync_api
 from utils import config_adapter
 from utils import logging_adapter
 from utils import settings_manager
@@ -11,6 +10,9 @@ from page_objects import login_page as lg, manager_profile_page
 from page_objects import manager_profile_page as mpp
 from page_objects import customer_profile_page as upp
 from page_objects import transactions_page as tp
+from page_objects import manager_add_customer_page as macp
+from page_objects import manager_customers_page as mcp
+from page_objects import navigation_elements as nav
 
 
 @settings_manager.settings_manager(
@@ -329,6 +331,7 @@ def test_transactions(page, case):
                 log.info("Modifying the start time in the filter to = "
                          "{0}".format(operation_end_time_str))
                 transactions_page.modify_start_time(operation_start_time_str)
+                transactions_page.modify_end_time(operation_end_time_str)
                 transactions_page.get_data_from_row_id(
                     0, "Date-Time")
             except playwright.sync_api.TimeoutError:
@@ -347,3 +350,75 @@ def test_transactions(page, case):
             log.info("Finally we assert the row was not found")
             assert not row_found
             log.info("Assertion was correct, operation was not registered")
+
+@pytest.mark.parametrize("case", test_data_adapter.open_test_data_file(
+    "test_data/new_customers_data.json"))
+def test_manager_create_customer(page, case):
+
+    log = logging_adapter.LoggingAdapter.get_logger()
+    log.info("Testing login to application")
+    log.info("Test data = {0}".format(case))
+    log.info("Opening url = {0}".format(TestSettings.settings["base_url"]))
+    login_page = lg.LoginPage(page, TestSettings.settings["base_url"])
+    manager_profile: mpp.ManagerProfile = manager_profile_page.ManagerProfile(
+        page)
+    customer_profile: upp.CustomerProfile = upp.CustomerProfile(page)
+    # Logging in as a manager
+    login_page.click_button_login_role("manager")
+    manager_profile.click_button_with_name("Add Customer")
+    form_add_customer: macp.AddCustomerPage = macp.AddCustomerPage(page)
+    form_add_customer.fill_in_first_name(case["First Name"])
+    form_add_customer.fill_in_last_name(case["Last Name"])
+    form_add_customer.fill_in_post_code(str(case["Post Code"]))
+
+    form_add_customer.click_form_button_with_name("Add Customer")
+    customer_profile.click_button_with_name("Customers")
+    customers_table: mcp.CustomersListSection = mcp.CustomersListSection(page)
+    j: int = 0
+    new_customer: dict | None = None
+    while j < 3:
+        try:
+            log.info("Iteration j = {0}".format(j))
+            new_customer: dict = customers_table.get_customer_data(case["First Name"], case["Last Name"])
+        except (playwright.sync_api.TimeoutError, ValueError) as e:
+            log.error(e)
+            log.info("Customer creation was not processed yet")
+            log.info("We will retry again")
+            log.info("Let's wait 30 seconds")
+            time.sleep(30)
+            log.info("Reloading page")
+            customers_table.page.reload()
+            log.info("Page reloaded")
+            log.info("Increasing retry counter")
+            j+=1
+        else:
+            log.info("Customer found")
+            log.info("Breaking the loop")
+            break
+
+    for key_ in new_customer:
+        if key_ not in ["Account Number", "Delete Customer"]:
+            assert new_customer[key_] == str(case[key_])
+        elif key_ == "Account Number":
+            assert new_customer[key_] == ""
+        elif key_ == "Delete Customer":
+            assert new_customer[key_] == "Delete"
+
+    navigation_bar: nav.UpperNavigationElements = (
+        nav.UpperNavigationElements(page))
+    navigation_bar.click_button_with_name("Home")
+
+    login_page.click_button_login_role("customer")
+    login_page.select_user_from_dropdown(new_customer["First Name"] + " " + new_customer["Last Name"])
+    login_page.click_button_with_name("Login")
+    print("")
+    customer_profile: upp.CustomerProfile = upp.CustomerProfile(page)
+    assert (new_customer["First Name"] + " " + new_customer["Last Name"] ==
+            customer_profile.get_username())
+    customer_button_names: list[str] = ["Transactions", "Deposit",
+                                        "Withdrawl"]
+    for button_name in customer_button_names:
+        log.info("Checking button {0} is displayed".format(button_name))
+        assert not customer_profile.is_button_with_name_displayed(button_name)
+        log.info("Assertion was correct")
+

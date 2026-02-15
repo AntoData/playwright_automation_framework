@@ -3,10 +3,10 @@ import random
 import pytest
 import logging
 from collections.abc import Generator
-from playwright.async_api import ViewportSize
-from playwright.sync_api import Page, Browser, BrowserContext
 from pathlib import Path
 from datetime import datetime
+from playwright.async_api import ViewportSize
+from playwright.sync_api import Page, Browser, BrowserContext
 from utils import video_manager
 from utils import config_adapter
 from utils import settings_manager

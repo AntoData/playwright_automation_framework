@@ -4,7 +4,7 @@ page of a web application.
 """
 import time
 from page_objects import page_object_template
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page
 
 class LoginPage(page_object_template.PageObjectTemplate):
     """
