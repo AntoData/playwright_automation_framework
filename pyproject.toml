@@ -1,0 +1,25 @@
+[project]
+name = "playwright-automation-framework"
+version = "0.1.0"
+description = "Playwright test automation framework"
+requires-python = ">=3.10"
+dependencies = [
+  "playwright",
+  "pytest",
+  "pytest-playwright"
+]
+
+[tool.setuptools]
+# Flat-layout (packages live at the repository root)
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests*", "test_data*", "logs*", "videos*", "tmp*", ".venv*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

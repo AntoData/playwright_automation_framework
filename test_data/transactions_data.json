@@ -1,0 +1,26 @@
+[
+    {
+    "username": "Hermoine Granger",
+    "Account Number": "1001",
+    "Balance": "5096",
+    "Currency": "Dollar",
+    "Operation": "Deposit",
+    "Amount": "500"
+  },
+    {
+    "username": "Hermoine Granger",
+    "Account Number": "1001",
+    "Balance": "5096",
+    "Currency": "Dollar",
+    "Operation": "Withdraw",
+    "Amount": "500"
+  },
+  {
+    "username": "Hermoine Granger",
+    "Account Number": "1001",
+    "Balance": "5096",
+    "Currency": "Dollar",
+    "Operation": "Withdraw",
+    "Amount": "6000"
+  }
+]

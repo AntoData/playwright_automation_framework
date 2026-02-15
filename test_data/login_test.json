@@ -1,0 +1,45 @@
+[
+  {
+    "user_role": "customer",
+    "username": "Ron Weasly",
+    "accounts": [
+      {
+        "Account Number": "1007",
+        "Balance": "0",
+        "Currency": "Dollar"
+      },
+      {
+        "Account Number": "1008",
+        "Balance": "0",
+        "Currency": "Pound"
+      },
+      {
+        "Account Number": "1009",
+        "Balance": "0",
+        "Currency": "Rupee"
+      }
+    ]
+  },
+  {
+    "user_role": "customer",
+    "username": "Hermoine Granger",
+    "accounts": [
+      {
+        "Account Number": "1001",
+        "Balance": "5096",
+        "Currency": "Dollar"
+      },
+      {
+        "Account Number": "1002",
+        "Balance": "0",
+        "Currency": "Pound"
+      },
+      {
+        "Account Number": "1003",
+        "Balance": "0",
+        "Currency": "Rupee"
+      }
+    ]
+  },
+  {"user_role": "manager"}
+]
