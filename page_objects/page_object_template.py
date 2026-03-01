@@ -5,8 +5,12 @@ framework.
 """
 import abc
 import logging
+
+import playwright.sync_api
+
 from utils import logging_adapter
-from playwright.sync_api import Page
+from playwright.sync_api import Page, expect
+
 
 class PageObjectTemplate(abc.ABC):
     """
@@ -24,3 +28,14 @@ class PageObjectTemplate(abc.ABC):
         """
         self.page: Page = page
         self.log: logging.Logger = logging_adapter.LoggingAdapter.get_logger()
+
+    def find_locator_or_reload(self, locator: playwright.sync_api.Locator,
+                               n_times: int, timeout: int):
+        for _ in range(0, n_times):
+            try:
+                expect(locator).to_be_visible(
+                    timeout=timeout)
+            except (playwright.sync_api.TimeoutError, AssertionError):
+                self.page.reload(wait_until="domcontentloaded")
+            else:
+                break

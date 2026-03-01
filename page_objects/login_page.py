@@ -100,8 +100,6 @@ class LoginPage(page_object_template.PageObjectTemplate):
             else:
                 self.log.warning(f"User '{user_name}' not found in dropdown "
                              f"menu yet, iteration = '{i}'")
-                self.log.warning("Sleeping for 1 sec")
-                time.sleep(2)
         return found
 
     def select_user_from_dropdown(self, user_name: str) -> None:

@@ -230,56 +230,11 @@ def test_transactions(page, case):
         customer_profile.click_button_with_name("Transactions")
         transactions_page: tp.TransactionsPage = tp.TransactionsPage(page)
 
-        # Transactions can take a while to be processed and displayed
-        # in the section Transactions so we need to apply a pattern
-        # to retry several times and wait after failure
-        row_found: bool = False
-        j: int = 0
-        operation_datetime_str: str | None = None
-        transaction_amount: str | None = None
-        transaction_type: str | None = None
-        while not row_found and j < 3:
-            try:
-                log.info("Modifying the start time in the filter to = "
-                         "{0}".format(operation_end_time_str))
-                transactions_page.modify_start_time(operation_start_time_str)
-                # Todo: KNOWN BUG -> (URL to bug)
-                #  If we modify the endtime to a period after the last
-                #  transaction was performed, whole table goes blank
-
-                # transactions_page.modify_end_time(operation_end_time_str)
-                log.info("Trying to get information from the first row in the"
-                         " table")
-                log.info("Trying to get Date Time")
-                operation_datetime_str: str = (
-                    transactions_page.get_data_from_row_id(
-                        0,"Date-Time"))
-                log.info("Date Time = {0}".format(operation_datetime_str))
-                log.info("Trying to get column Amount")
-                transaction_amount: str = (
-                    transactions_page.get_data_from_row_id(
-                        0, "Amount"))
-                log.info("Amount = {0}".format(transaction_amount))
-                log.info("Trying to get column TransactionType")
-                transaction_type: str = transactions_page.get_data_from_row_id(
-                    0, "Transaction Type")
-                log.info("Transaction Type = {0}".format(transaction_type))
-            except playwright.sync_api.TimeoutError as e:
-                log.error(e)
-                log.info("Iteration = {0}".format(j))
-                log.info("Transaction might not be registered yet")
-                log.info("Let's wait 30 seconds")
-                time.sleep(30)
-                log.info("Reloading page")
-                transactions_page.page.reload()
-                log.info("Page reloaded")
-                log.info("Increasing retry counter")
-                j += 1
-            else:
-                log.info("Row was found, breaking the loop")
-                row_found = True
-        # We need to assert first that we found the row
-        log.info("Did we find the first row in the table?")
+        # Transactions can take a while to be processed
+        (row_found, transaction_type, transaction_amount,
+         operation_datetime_str) =(
+            transactions_page.get_transaction_at_row(
+                operation_start_time_str, operation_end_time_str,0))
         assert row_found
         log.info("First row where the information of our most recent"
                  " transaction should be found")
@@ -324,33 +279,11 @@ def test_transactions(page, case):
         transactions_page.modify_start_time(operation_start_time_str)
         # As transactions might take a while to be registered we need
         # to check several times
-        row_found: bool = False
-        j: int = 0
-        while not row_found and j < 3:
-            try:
-                log.info("Iteration j = {0}".format(j))
-                log.info("Modifying the start time in the filter to = "
-                         "{0}".format(operation_end_time_str))
-                transactions_page.modify_start_time(operation_start_time_str)
-                transactions_page.modify_end_time(operation_end_time_str)
-                transactions_page.get_data_from_row_id(
-                    0, "Date-Time")
-            except playwright.sync_api.TimeoutError:
-                log.info("Transaction was not saved in the table")
-                log.info("We will retry again")
-                log.info("Reloading page")
-                transactions_page.page.reload()
-                log.info("Page reloaded")
-                log.info("Let's wait 30 seconds")
-                time.sleep(30)
-                log.info("Increasing retry counter")
-                j += 1
-            else:
-                raise AssertionError("Transaction was saved in the table, "
-                                     "but it was not finalized")
-            log.info("Finally we assert the row was not found")
-            assert not row_found
-            log.info("Assertion was correct, operation was not registered")
+        (row_found, transaction_type, transaction_amount,
+         operation_datetime_str) = transactions_page.get_transaction_at_row(
+            operation_start_time_str, operation_end_time_str, 0)
+        assert not row_found
+        log.info("Assertion was correct")
 
 @pytest.mark.parametrize("case", test_data_adapter.open_test_data_file(
     Path("test_data") / "new_customers_data.json"))
