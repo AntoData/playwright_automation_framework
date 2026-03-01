@@ -16,7 +16,7 @@ from utils import config_adapter
 
 @settings_manager.settings_manager(
     connector = config_adapter.ConfigFileAdapter,
-    path = "/config/config.ini",
+    path = Path("config") / "config.ini",
     settings_list = ["log_level"])
 class LogSettings:
     """
@@ -74,7 +74,7 @@ class LoggingAdapter:
         return cls._log
 
     @classmethod
-    def setup(cls, file_name: str, also_console: bool = True) -> (
+    def setup(cls, file_name: str | Path, also_console: bool = True) -> (
             logging.Logger):
         """
         Configure per-tests logging to a file (and optionally stderr).
@@ -94,7 +94,8 @@ class LoggingAdapter:
         cls.teardown()
 
         # Ensure the directory for the log file exists
-        Path(file_name).parent.mkdir(parents=True, exist_ok=True)
+        log_file_path = Path(file_name)
+        log_file_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Create a formatter that includes the logger name, level,
         # timestamp, line number, and message
@@ -104,7 +105,7 @@ class LoggingAdapter:
 
         # Create and add a file handler for logging to the specified
         # file
-        cls._file_handler = logging.FileHandler(file_name, mode="w",
+        cls._file_handler = logging.FileHandler(log_file_path, mode="w",
                                                 encoding="utf-8")
         cls._file_handler.setLevel(
             LogSettings.log_levels[LogSettings.settings["log_level"]])

@@ -8,12 +8,13 @@ class attribute named `settings`. This allows for easy access to
 configuration settings within the class without needing to manually
 load them each time.
 """
-from utils import config_adapter
+from pathlib import Path
 from typing import Type, Callable
+from utils import config_adapter
 
 
 def settings_manager(connector: Type[config_adapter.ConfigFileAdapter],
-                     path: str,
+                     path: str | Path,
                      settings_list: list[str] = None) -> Callable:
     """
     Class decorator that injects a `settings` dictionary into the
@@ -24,7 +25,7 @@ def settings_manager(connector: Type[config_adapter.ConfigFileAdapter],
     :param path: Path to the configuration resource (e.g., file path,
      database connection string, API endpoint, etc.) if needed by the
      connector to fetch the settings.
-    :type path: str
+    :type path: str | Path
     :param settings_list: An optional list of setting names to fetch.
     If None or empty, all settings from the specified source will be
     retrieved.

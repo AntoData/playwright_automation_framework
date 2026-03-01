@@ -9,6 +9,7 @@ configuration sources, such as files, databases, or external services,
 ensuring that settings are retrieved correctly and securely.
 """
 import abc
+from pathlib import Path
 
 class SettingsAdapter(abc.ABC):
     """
@@ -19,19 +20,19 @@ class SettingsAdapter(abc.ABC):
     """
     @classmethod
     @abc.abstractmethod
-    def connect(cls, resource_path: str):
+    def connect(cls, resource_path: str | Path):
         """
         Abstract method to connect to a configuration source and
         retrieve settings as a dictionary. Subclasses must implement
         this method to specify how to connect to the configuration
         and fetch the settings.
 
-        :param resource_path: A string representing the path to the
+        :param resource_path: A string or Path representing the path to the
         configuration resource (e.g., file path, database connection
         string, API endpoint, etc.) if needed by the adapter to fetch
         the settings. It should be a folder over the root of the
         project.
-        :type resource_path: str
+        :type resource_path: str | Path
         :return: A dictionary containing the configuration settings
         retrieved from the specified resource.
         :rtype: dict

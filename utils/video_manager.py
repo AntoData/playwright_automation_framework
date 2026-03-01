@@ -8,7 +8,6 @@ specified path with a unique name based on the tests name and timestamp,
   and includes error handling to log any issues that arise during the
   saving process.
 """
-import os
 import shutil
 import logging
 from pathlib import Path
@@ -21,7 +20,7 @@ from utils import logging_adapter
 
 
 @settings_manager.settings_manager(connector=config_adapter.ConfigFileAdapter,
-                                   path="/config/config.ini",
+                                   path=Path("config") / "config.ini",
                                    settings_list=["temp_video_path",
                                                   "final_video_path"])
 class VideoSettings:
@@ -49,21 +48,21 @@ def playwright_video_manager(page: Page, video_name: str) -> None:
     video = page.video
     log.info("")
     log.info("--- After test execution: Managing Playwright video ---")
-    video_path_relative: str = VideoSettings.settings["final_video_path"]
+    video_path_relative = Path(VideoSettings.settings["final_video_path"])
     # Save the video to the specified path
     if video:
         log.info(f"Saving video to {video_path_relative}")
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         file_name: str = "{0}-{1}.webm".format(video_name, timestamp)
-        full_video_path: str = (path_utils.get_project_root() + "/" +
-                                video_path_relative + "/" + file_name)
+        full_video_path: Path = (
+            path_utils.get_project_root() / video_path_relative / file_name
+        )
         log.info("Full video path: {0}".format(full_video_path))
-        Path(os.path.dirname(full_video_path) or ".").mkdir(
-            parents=True, exist_ok=True)
+        full_video_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             log.info("Attempting to save video for {0} at {1}".format(
                 video_name, full_video_path))
-            video.save_as(full_video_path)
+            video.save_as(str(full_video_path))
             log.info("Video saved successfully for {0} at {1}".format(
                 video_name, full_video_path))
         except (RuntimeError, IOError, Exception) as e:

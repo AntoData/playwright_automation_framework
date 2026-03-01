@@ -1,15 +1,13 @@
 """
 Utility functions for handling file paths in the project.
 """
-import os
+from pathlib import Path
 
-def get_project_root() -> str:
+def get_project_root() -> Path:
     """
     Retrieves the root directory of the project.
-    :return: A string representing the absolute path to the root
+    :return: A Path representing the absolute path to the root
     directory of the project.
-    :rtype: str
+    :rtype: Path
     """
-    current_path: str = os.path.abspath(__file__)
-    project_root: str = os.path.dirname(os.path.dirname(current_path))
-    return project_root
+    return Path(__file__).resolve().parent.parent

@@ -15,7 +15,7 @@ from utils import path_utils as path_utils
 from utils import page_event_logging
 
 @settings_manager.settings_manager(connector=config_adapter.ConfigFileAdapter,
-                                   path="/config/config.ini",
+                                   path=Path("config") / "config.ini",
                                    settings_list=["headless_mode",
                                                   "temp_video_path",
                                                   "final_video_path",
@@ -95,12 +95,11 @@ def context(browser: Browser) \
     """
     # Ensure the temporary video directory exists
     project_root = path_utils.get_project_root()
-    temp_video_path = (project_root + "/" +
-                       TestSettings.settings["temp_video_path"])
-    Path(temp_video_path).mkdir(parents=True, exist_ok=True)
+    temp_video_path = project_root / TestSettings.settings["temp_video_path"]
+    temp_video_path.mkdir(parents=True, exist_ok=True)
     # Create a new browser context with the specified settings
     context = browser.new_context(
-        record_video_dir=temp_video_path,  # always record
+        record_video_dir=str(temp_video_path),  # always record
         viewport = ViewportSize(
             width=int(TestSettings.settings["view_port_width"]),
             height=int(TestSettings.settings["view_port_height"])
@@ -124,13 +123,14 @@ def test_log_setup(request) -> None:
     :return:
     """
     timestamp: str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    project_root: str = path_utils.get_project_root()
+    project_root: Path = path_utils.get_project_root()
+    log_file_path = project_root / "logs" / "{0}-{1}-{2}.log".format(
+        request.node.name,
+        timestamp,
+        random.randint(0, 100000),
+    )
     logging_adapter.LoggingAdapter.setup(
-        project_root + "/logs/{0}-{1}-{2}.log".format(
-            request.node.name,
-            timestamp,
-            random.randint(0, 100000),
-        ),
+        log_file_path,
         also_console=TestSettings.settings[
                          "network_and_console_logs"].lower() == "true",
     )

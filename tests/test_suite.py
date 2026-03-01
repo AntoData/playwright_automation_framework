@@ -1,5 +1,6 @@
 import time
 import pytest
+from pathlib import Path
 from datetime import datetime, timedelta
 import playwright.sync_api
 from utils import config_adapter
@@ -17,7 +18,7 @@ from page_objects import navigation_elements as nav
 
 @settings_manager.settings_manager(
     connector=config_adapter.ConfigFileAdapter,
-                      path="/config/config.ini",
+                      path=Path("config") / "config.ini",
                       settings_list=["base_url"])
 class TestSettings:
     """
@@ -26,7 +27,7 @@ class TestSettings:
     settings: dict | None = None
 
 @pytest.mark.parametrize("case", test_data_adapter.open_test_data_file(
-    "test_data/login_test.json"))
+    Path("test_data") / "login_test.json"))
 def test_login(page, case):
     """
     Tests the login page for different users with different roles whose
@@ -134,7 +135,7 @@ def test_login(page, case):
 # bugs regarding the transactions workflow
 # @pytest.mark.xfail
 @pytest.mark.parametrize("case", test_data_adapter.open_test_data_file(
-    "test_data/transactions_data.json"))
+    Path("test_data") / "transactions_data.json"))
 def test_transactions(page, case):
     """
     Tests customers transactions, deposit, withdrawal and case when
@@ -352,7 +353,7 @@ def test_transactions(page, case):
             log.info("Assertion was correct, operation was not registered")
 
 @pytest.mark.parametrize("case", test_data_adapter.open_test_data_file(
-    "test_data/new_customers_data.json"))
+    Path("test_data") / "new_customers_data.json"))
 def test_manager_create_customer(page, case):
 
     log = logging_adapter.LoggingAdapter.get_logger()
